@@ -1,0 +1,58 @@
+
+/**
+ * Author: treerabbit23
+ * Date: 12/11/2018
+ * Time: 7:06 PM
+ */
+
+$time_start = microtime(true);
+
+$player_count = 431;
+$last_marble_value = 70950;
+
+$player_array = [];
+$current_player = 0;
+
+$board_array = [];
+$current_board_position = 0;
+
+for ($x = 0; $x <= $last_marble_value; ++$x) { // play the new marble
+    $tracker_x = (float)$x;
+    $tracker_last = (float)$last_marble_value;
+
+    if ($x % 23 == 0 && $x > 0) { // is this a scoring round?
+        if (isset($player_array[$current_player])) { // add this marble to the player's score
+            $player_array[$current_player] += $x;
+        } else {
+            $player_array[$current_player] = $x;
+        }
+        
+        $current_board_position -= 9; // find the marble 7 behind the last move (9 behind current pos)
+        if ($current_board_position < 0) { 
+            $current_board_position += count($board_array);
+        }
+        
+        $player_array[$current_player] += $board_array[$current_board_position]; // add it to the player's score
+        
+        unset($board_array[$current_board_position]); // then remove that marble from the board
+        $board_array = array_values($board_array);
+    } else {
+        // insert a marble marked $marble_value into the $board_array at this $current_board_position
+        $new_marble = [$x];
+        array_splice($board_array, $current_board_position, 0, $new_marble);
+    }
+
+    $current_board_position += 2; // move the $current_board_position forward by 2
+    $board_length = count($board_array);
+    if ($current_board_position > $board_length) {
+        $current_board_position -= $board_length;
+    }
+
+    ++$current_player;  // pass play to the next player
+    if ($current_player > $player_count) {
+        $current_player = 1;
+    }
+}
+
+echo "First part: " . max($player_array) . PHP_EOL;
+echo "Runtime 1 (seconds): " . (microtime(true) - $time_start) . "\n";
